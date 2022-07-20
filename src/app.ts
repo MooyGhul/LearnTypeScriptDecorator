@@ -19,16 +19,45 @@ function WithTemplate(template: string, hookId: string) {
       hookEl.innerHTML = template;
     }
   }
+
 }
 
 function WithTemplate2(template: string, hookId: string) {
   console.log(3);
-  return function(constructor: any) {
-    const hookEl = document.getElementById(hookId);
-    const p = new constructor();
-    if (hookEl) {
-      hookEl.innerHTML = template;
-      hookEl.querySelector('h1')!.textContent=p.name;
+  return function<T extends {new (...args:any[]):{name:string}}>(originalConstructor: T) {
+    // const hookEl = document.getElementById(hookId);
+    // const p = new originalConstructor();
+    // if (hookEl) {
+    //   hookEl.innerHTML = template;
+    //   hookEl.querySelector('h1')!.textContent=p.name;
+    // }
+
+    // class decortor can return a constructor which will replace the old one
+    // class is syntax suger allows you to create a constructor function here
+    // I am returning a new class (actually a sugar for constructor function) 
+    //    which based on the original constructor function, so that keep all properties 
+    //    of the original class and constructor function.
+    // return function (constructor: any) { ... return class extends constructor{} }
+    // can add new functionalities:
+    // for example add new constructor, remember to rename parameter 
+    // from constructor to originalConstructor to avoid conflicts
+    // add super() in the new constructor, and other logics
+
+    // Overall , we try to replace the construction by adding a decorator with class and new constructor
+    //   where still execute the old logic and also new logic, after the change, the template only rendered during object instantiation.
+
+    // 
+    return class extends originalConstructor {
+      constructor(..._:any) {
+        super();
+        const hookEl = document.getElementById(hookId);
+        // const p = new originalConstructor();
+        if (hookEl) {
+          hookEl.innerHTML = template;
+          // because I dont call my constructor any more
+          hookEl.querySelector('h1')!.textContent= this.name;//p.name;
+        }
+      }
     }
   }
 }
