@@ -145,3 +145,38 @@ class Product {
     return this.price*(1+tax);
   }
 }
+
+
+
+function Autobind(_: any, _1:string, descriptor:PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  const adjDescriptor: PropertyDescriptor = {
+    configurable: true,
+    enumerable:false,
+    get() {
+      const boundFn = originalMethod.bind(this);
+      return boundFn;
+    }
+  }
+  return adjDescriptor;
+}
+
+
+class Printer {
+  message = 'This Works!';
+  
+  @Autobind
+  showMessage() {
+    console.log(this.message);
+  }
+}
+
+const p = new Printer();
+
+const button = document.querySelector('button');
+// ??? WHY not p.showMessage()
+// not showing correctly, because this will aim to the target of event
+button?.addEventListener('click',p.showMessage);
+
+
+
